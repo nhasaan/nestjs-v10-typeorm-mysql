@@ -35,6 +35,12 @@ class EnvironmentVariables {
 
   @IsString()
   SESSION_SECRET: string;
+
+  @IsString()
+  RMQ_CONN: string;
+
+  @IsString()
+  RMQ_QUEUE: string;
 }
 
 export function validate(config: Record<string, unknown>) {
