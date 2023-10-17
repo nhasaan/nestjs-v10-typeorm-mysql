@@ -11,8 +11,9 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @EventPattern('book-created')
+  @EventPattern({ cmd: 'new_book' })
   async handleBookCreatedEvent(data: Record<string, unknown>) {
-    console.log(data);
+    console.log('data: ', data);
+    return data;
   }
 }

@@ -6,8 +6,7 @@ import { AllExceptionsFilter } from '@/common/filters';
 import { APP_FILTER } from '@nestjs/core';
 import { CoreModule } from '../modules/core/core.module';
 import { ClientAppController } from './client-app.controller';
-import { ClientProxyFactory, Transport } from '@nestjs/microservices';
-import { ConfigService } from '@nestjs/config';
+import { Transport, ClientsModule } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -18,6 +17,19 @@ import { ConfigService } from '@nestjs/config';
       max: 10, // maximum number of items in cache
     }),
     RouteModule,
+    ClientsModule.register([
+      {
+        name: 'CLIENT_APP_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RMQ_CONN],
+          queue: process.env.RMQ_QUEUE,
+          queueOptions: {
+            durable: false,
+          },
+        },
+      },
+    ]),
   ],
   controllers: [ClientAppController],
   providers: [
@@ -28,19 +40,6 @@ import { ConfigService } from '@nestjs/config';
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
-    },
-    {
-      provide: 'CLIENT_APP_SERVICE',
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        return ClientProxyFactory.create({
-          transport: Transport.TCP,
-          options: {
-            host: configService.get('BOOKSTORE_SERVICE_HOST'),
-            port: configService.get('BOOKSTORE_SERVICE_PORT'),
-          },
-        });
-      },
     },
   ],
 })
